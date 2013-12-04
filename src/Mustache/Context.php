@@ -140,6 +140,11 @@ class Mustache_Context
             } 
             
             if (is_object($stack[$i]) && !$stack[$i] instanceof Closure) {
+                if($stack[$i] instanceof Rex\Data\DataObject && 
+                    ($stack[$i]->hasRelation($id))
+                  ) {
+                  return $stack[$i]->$id();
+                }
                 if (method_exists($stack[$i], $id)) {
                     return $stack[$i]->$id();
                 } elseif (isset($stack[$i]->$id)) {
