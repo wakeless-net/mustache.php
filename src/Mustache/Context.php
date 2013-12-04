@@ -133,6 +133,12 @@ class Mustache_Context
     private function findVariableInStack($id, array $stack)
     {
         for ($i = count($stack) - 1; $i >= 0; $i--) {
+            if ($stack[$i] instanceof ArrayAccess) {
+              if(isset($stack[$i][$id])) {
+                return $stack[$i][$id];
+              }
+            } 
+            
             if (is_object($stack[$i]) && !$stack[$i] instanceof Closure) {
                 if (method_exists($stack[$i], $id)) {
                     return $stack[$i]->$id();
