@@ -133,16 +133,13 @@ class Mustache_Context
     private function findVariableInStack($id, array $stack)
     {
         for ($i = count($stack) - 1; $i >= 0; $i--) {
-            if ($stack[$i] instanceof ArrayAccess) {
-              if(isset($stack[$i][$id])) {
-                return $stack[$i][$id];
-              }
-            } 
-            
-            if (is_object($stack[$i]) && !$stack[$i] instanceof Closure) {
+            if (is_object($stack[$i]) && !($stack[$i] instanceof \Closure)) {
                 if($stack[$i] instanceof Rex\Data\DataObject && 
                     ($stack[$i]->hasRelation($id))
                   ) {
+                  return $stack[$i]->$id();
+                }
+                if(method_exists($stack[$i], "isDeferred") && $stack[$i]->isDeferred($id)) {
                   return $stack[$i]->$id();
                 }
                 if (method_exists($stack[$i], $id)) {
@@ -150,6 +147,11 @@ class Mustache_Context
                 } elseif (isset($stack[$i]->$id)) {
                     return $stack[$i]->$id;
                 }
+            }
+            if ($stack[$i] instanceof ArrayAccess) {
+              if(isset($stack[$i][$id])) {
+                return $stack[$i][$id];
+              }
             } elseif (is_array($stack[$i]) && array_key_exists($id, $stack[$i])) {
                 return $stack[$i][$id];
             }
